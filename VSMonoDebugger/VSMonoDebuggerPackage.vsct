@@ -15,10 +15,10 @@
         defining some of the constants that we will use inside the file. -->
 
   <!--This is the file that defines the IDs for all the commands exposed by VisualStudio. -->
-  <Extern href="stdidcmd.h"/>
+  <Extern href="stdidcmd.h" />
 
   <!--This header contains the command ids for the menus provided by the shell. -->
-  <Extern href="vsshlids.h"/>
+  <Extern href="vsshlids.h" />
 
   <!--The Commands section is where commands, menus, and menu groups are defined.
       This section uses a Guid to identify the package that provides the command defined inside it. -->
@@ -42,6 +42,13 @@
           <CommandName>Mono</CommandName>
         </Strings>
       </Menu>
+      <Menu guid="guidVSMonoDebuggerPackageCmdSet1" id="MyMenuController" priority="0x1000" type="MenuController">
+        <Parent guid="guidVSMonoDebuggerPackageCmdSet1" id="MyToolbarItemGroup" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <ButtonText></ButtonText>
+        </Strings>
+      </Menu>
     </Menus>
 
     <!-- In this section you can define new menu groups. A menu group is a container for
@@ -50,10 +57,20 @@
          must be a menu. -->
     <Groups>
       <Group guid="guidVSMonoDebuggerPackageCmdSet" id="MonoMainMenuGroupLevel1" priority="0x0600">
-        <Parent guid="guidVSMonoDebuggerPackageCmdSet" id="MonoMainMenu"/>
+        <Parent guid="guidVSMonoDebuggerPackageCmdSet" id="MonoMainMenu" />
       </Group>
       <Group guid="guidVSMonoDebuggerPackageCmdSet" id="MonoMainMenuGroupLevel2" priority="0x0700">
-        <Parent guid="guidVSMonoDebuggerPackageCmdSet" id="MonoMainMenu"/>
+        <Parent guid="guidVSMonoDebuggerPackageCmdSet" id="MonoMainMenu" />
+      </Group>
+      <!-- The group that adds the MenuController on the Solution Explorer toolbar.
+        The 0x4000 priority adds this group after the group that contains the
+        Preview Selected Items button, which is normally at the far right of the toolbar. -->
+      <Group guid="guidVSMonoDebuggerPackageCmdSet1" id="MyToolbarItemGroup" priority="0x4000" >
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_TOOL_PROJWIN" />
+      </Group>
+      <!-- The group for the items on the MenuController drop-down. It is added to the MenuController submenu. -->
+      <Group guid="guidVSMonoDebuggerPackageCmdSet1" id="MyMenuControllerGroup" priority="0x4000" >
+        <Parent guid="guidVSMonoDebuggerPackageCmdSet1" id="MyMenuController" />
       </Group>
     </Groups>
 
@@ -69,6 +86,32 @@
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
 
+      <Button guid="guidVSMonoDebuggerPackageCmdSet1" id="cmdidMyDynamicStartCommand" priority="0x1000" >
+        <Parent guid="guidVSMonoDebuggerPackageCmdSet1" id="MyMenuControllerGroup" />
+        <CommandFlag>DynamicItemStart</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>TextChanges</CommandFlag>
+        <!-- This text does not appear. -->
+        <Strings>
+          <ButtonText>Project</ButtonText>
+        </Strings>
+      </Button>
+
+      <!-- The anchor item to supply the icon/tooltip for the MenuController -->
+      <Button guid="guidVSMonoDebuggerPackageCmdSet1" id="cmdidMyAnchorCommand" priority="0x0000" >
+        <Parent guid="guidVSMonoDebuggerPackageCmdSet1" id="MyMenuControllerGroup" />
+        <!-- This is the icon that appears on the Solution Explorer toolbar. -->
+        <Icon guid="guidImages" id="bmpPicArrows"/>
+        <!-- Do not show on the menu controller's drop down list-->
+        <CommandFlag>NoShowOnMenuController</CommandFlag>
+        <!-- Become the permanent anchor item for the menu controller -->
+        <CommandFlag>FixMenuController</CommandFlag>
+        <!-- The text that appears in the tooltip.-->
+        <Strings>
+          <ButtonText>Set Startup Project</ButtonText>
+        </Strings>
+      </Button>
+      
       <Button guid="guidVSMonoDebuggerPackageCmdSet" id="cmdDeployAndDebugOverSSH" priority="0x0400" type="Button">
         <Parent guid="guidVSMonoDebuggerPackageCmdSet" id="MonoMainMenuGroupLevel1" />
         <CommandFlag>DynamicVisibility</CommandFlag>
@@ -153,14 +196,15 @@
             bitmap strip containing the bitmaps and then there are the numeric ids of the elements used
             inside a button definition. An important aspect of this declaration is that the element id
             must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
-      <Bitmap guid="guidImages" href="Resources\VSMonoDebuggerCommands.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough"/>
-      <Bitmap guid="BatchCheckIn_16x" href="Resources\BatchCheckIn_16x.png" usedList="imgDeployOnly"/>
-      <Bitmap guid="DebugTemplate_16x" href="Resources\DebugTemplate_16x.png" usedList="imgDebugOnly"/>
-      <Bitmap guid="DownloadLog_16x" href="Resources\DownloadLog_16x.png" usedList="imgShowLogfile"/>
-      <Bitmap guid="Settings_16x" href="Resources\Settings_16x.png" usedList="imgSettings"/>
-      <Bitmap guid="StartRemoteDebugger_16x" href="Resources\StartRemoteDebugger_16x.png" usedList="imgDeployAndDebug"/>
-      <Bitmap guid="Process_16x" href="Resources\Process_16x.png" usedList="imgAttachToMonoDebuggerWithoutSSH"/>
-      <Bitmap guid="BuildSelection_16x" href="Resources\BuildSelection_16x.png" usedList="imgBuildProjectWithMDBFiles"/>
+      <Bitmap guid="guidImages" href="Resources\VSMonoDebuggerCommands.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
+      <Bitmap guid="BatchCheckIn_16x" href="Resources\BatchCheckIn_16x.png" usedList="imgDeployOnly" />
+      <Bitmap guid="DebugTemplate_16x" href="Resources\DebugTemplate_16x.png" usedList="imgDebugOnly" />
+      <Bitmap guid="DownloadLog_16x" href="Resources\DownloadLog_16x.png" usedList="imgShowLogfile" />
+      <Bitmap guid="Settings_16x" href="Resources\Settings_16x.png" usedList="imgSettings" />
+      <Bitmap guid="StartRemoteDebugger_16x" href="Resources\StartRemoteDebugger_16x.png" usedList="imgDeployAndDebug" />
+      <Bitmap guid="Process_16x" href="Resources\Process_16x.png" usedList="imgAttachToMonoDebuggerWithoutSSH" />
+      <Bitmap guid="BuildSelection_16x" href="Resources\BuildSelection_16x.png" usedList="imgBuildProjectWithMDBFiles" />
+      <Bitmap guid="guidImages1" href="Resources\AttachToEngineCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
     </Bitmaps>
   </Commands>
 
@@ -187,35 +231,55 @@
       <IDSymbol name="cmdBuildProjectWithMDBFiles" value="0x1007" />
     </GuidSymbol>
 
-    <GuidSymbol name="BatchCheckIn_16x" value="{A6146350-5354-4ABE-B452-FB63881C9293}" >
+    <GuidSymbol name="BatchCheckIn_16x" value="{A6146350-5354-4ABE-B452-FB63881C9293}">
       <IDSymbol name="imgDeployOnly" value="1" />
     </GuidSymbol>
 
-    <GuidSymbol name="DebugTemplate_16x" value="{6BEC4581-8F59-4A3F-BA52-723454EF06D4}" >
+    <GuidSymbol name="DebugTemplate_16x" value="{6BEC4581-8F59-4A3F-BA52-723454EF06D4}">
       <IDSymbol name="imgDebugOnly" value="1" />
     </GuidSymbol>
 
-    <GuidSymbol name="DownloadLog_16x" value="{E48E1F6F-B26C-460A-86DF-69904236B876}" >
+    <GuidSymbol name="DownloadLog_16x" value="{E48E1F6F-B26C-460A-86DF-69904236B876}">
       <IDSymbol name="imgShowLogfile" value="1" />
     </GuidSymbol>
 
-    <GuidSymbol name="Settings_16x" value="{F0E24D10-A061-470F-8162-892ED3BB1ABF}" >
+    <GuidSymbol name="Settings_16x" value="{F0E24D10-A061-470F-8162-892ED3BB1ABF}">
       <IDSymbol name="imgSettings" value="1" />
     </GuidSymbol>
 
-    <GuidSymbol name="StartRemoteDebugger_16x" value="{95F6FDC3-DA9F-4266-BD63-1A02ECCCBCDF}" >
+    <GuidSymbol name="StartRemoteDebugger_16x" value="{95F6FDC3-DA9F-4266-BD63-1A02ECCCBCDF}">
       <IDSymbol name="imgDeployAndDebug" value="1" />
     </GuidSymbol>
 
-    <GuidSymbol name="Process_16x" value="{20E883F0-E7EE-4444-B9B4-67F2892B3D0D}" >
+    <GuidSymbol name="Process_16x" value="{20E883F0-E7EE-4444-B9B4-67F2892B3D0D}">
       <IDSymbol name="imgAttachToMonoDebuggerWithoutSSH" value="1" />
     </GuidSymbol>
 
-    <GuidSymbol name="BuildSelection_16x" value="{C6D5524B-6CCF-4FC9-9BCF-A057BFB2AFA6}" >
+    <GuidSymbol name="BuildSelection_16x" value="{C6D5524B-6CCF-4FC9-9BCF-A057BFB2AFA6}">
       <IDSymbol name="imgBuildProjectWithMDBFiles" value="1" />
     </GuidSymbol>
 
-    <GuidSymbol name="guidImages" value="{4b8073cd-56e9-4e1e-91b9-728cebf52038}" >
+    <GuidSymbol name="guidImages" value="{4b8073cd-56e9-4e1e-91b9-728cebf52038}">
+      <IDSymbol name="bmpPic1" value="1" />
+      <IDSymbol name="bmpPic2" value="2" />
+      <IDSymbol name="bmpPicSearch" value="3" />
+      <IDSymbol name="bmpPicX" value="4" />
+      <IDSymbol name="bmpPicArrows" value="5" />
+      <IDSymbol name="bmpPicStrikethrough" value="6" />
+    </GuidSymbol>
+  
+    <GuidSymbol value="{07ff0b92-681c-4667-8172-40282cf03bdd}" name="guidVSMonoDebuggerPackageCmdSet1">
+      <IDSymbol name="MyToolbarItemGroup" value="0x1020" />
+      <IDSymbol name="MyMenuControllerGroup" value="0x1025" />
+      <IDSymbol name="MyMenuController" value ="0x1030"/>
+      <IDSymbol name="cmdidMyAnchorCommand" value="0x0103" />
+      <!-- NOTE: The following command expands at run time to some number of ids.
+     Try not to place command ids after it (e.g. 0x0105, 0x0106).
+     If you must add a command id after it, make the gap very large (e.g. 0x200) -->
+      <IDSymbol name="cmdidMyDynamicStartCommand" value="0x0104" />
+    </GuidSymbol>
+  
+    <GuidSymbol value="{29593c7a-bc85-4c05-98d4-adc08ef567e3}" name="guidImages1">
       <IDSymbol name="bmpPic1" value="1" />
       <IDSymbol name="bmpPic2" value="2" />
       <IDSymbol name="bmpPicSearch" value="3" />
@@ -224,4 +288,9 @@
       <IDSymbol name="bmpPicStrikethrough" value="6" />
     </GuidSymbol>
   </Symbols>
+
+  <VisibilityConstraints>
+    <!--Make the MenuController show up only when there is a solution with more than one project loaded-->
+    <VisibilityItem guid="guidVSMonoDebuggerPackageCmdSet1" id="MyMenuController" context="UICONTEXT_SolutionHasMultipleProjects"/>
+  </VisibilityConstraints>
 </CommandTable>

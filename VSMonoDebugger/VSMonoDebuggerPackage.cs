@@ -34,6 +34,7 @@ namespace VSMonoDebugger
     [ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
     [ProvideMenuResource("Menus.ctmenu", 1)]
+    [ProvideAutoLoad(UIContextGuids.SolutionHasMultipleProjects)]
     public sealed class VSMonoDebuggerPackage : AsyncPackage
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -102,6 +103,7 @@ namespace VSMonoDebugger
             }
 
             await base.InitializeAsync(cancellationToken, progress);
+            await AttachToEngineCommand.InitializeAsync(this);
         }
 
         #endregion
