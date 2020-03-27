@@ -14,6 +14,49 @@ using VSMonoDebugger.Settings;
 
 namespace Mono.Debugging.VisualStudio
 {
+    public class MonoDebugSession : SoftDebuggerSession
+    {
+        protected override bool HandleException(Exception ex)
+        {
+            if (ex is Mono.Debugger.Soft.VMNotSuspendedException)
+            {
+                return true;
+            }
+            return base.HandleException(ex);
+        }
+
+        protected override void OnStop()
+        {
+            base.OnDetach();
+        }
+
+        protected override void OnExit()
+        {
+            base.OnDetach();
+        }
+
+        protected override void OnDetach()
+        {
+            base.OnDetach();
+        }
+
+
+        protected override void OnRun(DebuggerStartInfo startInfo)
+        {
+            base.OnRun(startInfo);
+        }
+
+        protected override void OnResumed()
+        {
+            base.OnResumed();
+        }
+
+        protected override void OnAttachToProcess(long processId)
+        {
+            base.OnAttachToProcess(processId);
+        }
+    }
+
     [Guid(DebugEngineGuids.XamarinEngineString)]
     public class XamarinEngine : IDebugEngine2, IDebugEngineLaunch2
     {
@@ -38,7 +81,7 @@ namespace Mono.Debugging.VisualStudio
                 NLogService.TraceEnteringMethod(Logger);
                 var debugOptions = DebugOptions.DeserializeFromJson(jsonDebugOptions);
 
-                _session = new SoftDebuggerSession();
+                _session = new MonoDebugSession();
 
                 LogMonoDebuggerAssemblyPaths();
 
