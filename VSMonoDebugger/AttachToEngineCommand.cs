@@ -7,6 +7,7 @@ using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using static Microsoft.VisualStudio.VSConstants;
 using Task = System.Threading.Tasks.Task;
 
 namespace VSMonoDebugger
@@ -110,6 +111,8 @@ namespace VSMonoDebugger
             }
 
             this.package = package;
+
+            dte2 = (DTE2)(package as System.IServiceProvider).GetService(typeof(DTE));
             if (commandService != null)
             {
                 // Add the DynamicItemMenuCommand for the expansion of the root item into N items at run time.
@@ -119,13 +122,28 @@ namespace VSMonoDebugger
                     OnInvokedDynamicItem,
                     OnBeforeQueryStatusDynamicItem);
                 commandService.AddCommand(dynamicMenuCommand);
-                // 主动添加，find不到
+                AttachCommand = dynamicMenuCommand;
+                // add，find不到
                 CommandID defaultCommandId = new CommandID(new Guid(guidDynamicMenuPackageCmdSet), (int)cmdidMyAnchorCommand);
                 MenuCommand defaultMenuCommand = new MenuCommand(this.OnDefaultCommandExecute, defaultCommandId);
                 commandService.AddCommand(defaultMenuCommand);
+                //CommandID startCommand = new CommandID(new Guid("{5EFC7975-14BC-11CF-9B2B-00AA00573819}"), (int)VSStd97CmdID.Start);
+                //foreach(Command command in dte2.Commands)
+                //{
+                //    if(command.ID == (int)VSStd97CmdID.Start)
+                //    {
+                //        (command as MenuCommand)
+                //        int a = 1;
+                //    }
+                //}
+                //MenuCommand startMenu = commandService.FindCommand(startCommand);
+                
+                //if(startMenu != null)
+                //{
+                //    startMenu.Visible = false;
+                //}
             }
 
-            dte2 = (DTE2)(package as System.IServiceProvider).GetService(typeof(DTE));
             //var menuCommandID = new CommandID(CommandSet, CommandId);
             //var menuItem = new MenuCommand(this.Execute, menuCommandID);
             //commandService.AddCommand(menuItem);
@@ -146,6 +164,11 @@ namespace VSMonoDebugger
             get;
         }
 
+        public MenuCommand AttachCommand
+        {
+            private set;
+            get;
+        }
         /// <summary>
         /// Gets the service provider from the owner package.
         /// </summary>
@@ -170,6 +193,16 @@ namespace VSMonoDebugger
             OleMenuCommandService commandService = inCommandService as OleMenuCommandService;
             Instance = new AttachToEngineCommand(package, commandService);
             Instance.MonoExtension = monoVisualStudioExtension;
+        }
+
+        public void OnAttach()
+        {
+            Instance.AttachCommand.Enabled = false;
+        }
+
+        public void OnDetach()
+        {
+            Instance.AttachCommand.Enabled = true;
         }
 
         private async void OnDefaultCommandExecute(object sender, EventArgs e)

@@ -9,6 +9,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting;
 using System.Runtime.Serialization.Formatters.Binary;
+using VSMonoDebugger;
 using VSMonoDebugger.Services;
 using VSMonoDebugger.Settings;
 
@@ -16,6 +17,10 @@ namespace Mono.Debugging.VisualStudio
 {
     public class MonoDebugSession : SoftDebuggerSession
     {
+        public MonoDebugSession(): base()
+        {
+            this.DebugWriter += OnTargetDebug;
+        }
         protected override bool HandleException(Exception ex)
         {
             if (ex is Mono.Debugger.Soft.VMNotSuspendedException)
@@ -27,23 +32,24 @@ namespace Mono.Debugging.VisualStudio
 
         protected override void OnStop()
         {
-            base.OnDetach();
+            this.OnDetach();
         }
 
         protected override void OnExit()
         {
-            base.OnDetach();
+            this.OnDetach();
         }
 
         protected override void OnDetach()
         {
             base.OnDetach();
+            AttachToEngineCommand.Instance.OnDetach();
         }
-
 
         protected override void OnRun(DebuggerStartInfo startInfo)
         {
             base.OnRun(startInfo);
+            AttachToEngineCommand.Instance.OnAttach();
         }
 
         protected override void OnResumed()
@@ -54,7 +60,14 @@ namespace Mono.Debugging.VisualStudio
         protected override void OnAttachToProcess(long processId)
         {
             base.OnAttachToProcess(processId);
+            
         }
+
+        public static void OnTargetDebug(int level, string category, string message)
+        {
+            HostOutputWindowEx.WriteLineLaunchErrorAsync(string.Format("[{0}:{1}] {2}", level, category, message));
+        }
+    
     }
 
     [Guid(DebugEngineGuids.XamarinEngineString)]
