@@ -8,7 +8,7 @@ namespace VSMonoDebugger.Settings
 {
     public class UserSettings : BaseViewModel
     {
-        public readonly static int DEFAULT_DEBUGGER_AGENT_PORT = 11000;
+        public readonly static int DEFAULT_DEBUGGER_AGENT_PORT = 9000;
 
         public UserSettings()
         {

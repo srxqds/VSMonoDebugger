@@ -19,6 +19,7 @@ namespace VSMonoDebugger
 
         public const string guidDynamicMenuPackageCmdSet = "07ff0b92-681c-4667-8172-40282cf03bdd";  // get the GUID from the .vsct file
         public const uint cmdidMyCommand = 0x104;
+        public const uint cmdidMyAnchorCommand = 0x0103;
         private DTE2 dte2;
         private int rootItemId = 0;
 
@@ -118,10 +119,13 @@ namespace VSMonoDebugger
                     OnInvokedDynamicItem,
                     OnBeforeQueryStatusDynamicItem);
                 commandService.AddCommand(dynamicMenuCommand);
+                // 主动添加，find不到
+                CommandID defaultCommandId = new CommandID(new Guid(guidDynamicMenuPackageCmdSet), (int)cmdidMyAnchorCommand);
+                MenuCommand defaultMenuCommand = new MenuCommand(this.OnDefaultCommandExecute, defaultCommandId);
+                commandService.AddCommand(defaultMenuCommand);
             }
 
             dte2 = (DTE2)(package as System.IServiceProvider).GetService(typeof(DTE));
-            int a = 1;
             //var menuCommandID = new CommandID(CommandSet, CommandId);
             //var menuItem = new MenuCommand(this.Execute, menuCommandID);
             //commandService.AddCommand(menuItem);
@@ -134,6 +138,12 @@ namespace VSMonoDebugger
         {
             get;
             private set;
+        }
+
+        public MonoVisualStudioExtension MonoExtension
+        {
+            private set;
+            get;
         }
 
         /// <summary>
@@ -151,37 +161,21 @@ namespace VSMonoDebugger
         /// Initializes the singleton instance of the command.
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
-        public static async Task InitializeAsync(AsyncPackage package)
+        public static async Task InitializeAsync(AsyncPackage package, IMenuCommandService inCommandService, MonoVisualStudioExtension monoVisualStudioExtension)
         {
             // Switch to the main thread - the call to AddCommand in AttachToEngineCommand's constructor requires
             // the UI thread.
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
-
-            OleMenuCommandService commandService = await package.GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
+            
+            OleMenuCommandService commandService = inCommandService as OleMenuCommandService;
             Instance = new AttachToEngineCommand(package, commandService);
+            Instance.MonoExtension = monoVisualStudioExtension;
         }
 
-        /// <summary>
-        /// This function is the callback used to execute the command when the menu item is clicked.
-        /// See the constructor to see how the menu item is associated with this function using
-        /// OleMenuCommandService service and MenuCommand class.
-        /// </summary>
-        /// <param name="sender">Event sender.</param>
-        /// <param name="e">Event args.</param>
-        private void Execute(object sender, EventArgs e)
+        private async void OnDefaultCommandExecute(object sender, EventArgs e)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
-            string message = string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.GetType().FullName);
-            string title = "AttachToEngineCommand";
-
-            // Show a message box to prove we were here
-            VsShellUtilities.ShowMessageBox(
-                this.package,
-                message,
-                title,
-                OLEMSGICON.OLEMSGICON_INFO,
-                OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+            await MonoExtension.BuildStartupProjectAsync();
+            await VSMonoDebuggerCommands.Instance.DeployAndRunCommandOverSSHAsync(VSMonoDebuggerCommands.DebuggerMode.AttachProcess);
         }
     }
 }

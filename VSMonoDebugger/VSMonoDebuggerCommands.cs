@@ -47,6 +47,12 @@ namespace VSMonoDebugger
         /// </summary>
         private MonoVisualStudioExtension _monoExtension;
 
+        public static VSMonoDebuggerCommands Instance
+        {
+            get;
+            private set;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="VSMonoDebuggerCommands"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file)
@@ -54,6 +60,7 @@ namespace VSMonoDebugger
         /// <param name="asyncServiceProvider">Owner package, not null.</param>
         public VSMonoDebuggerCommands(AsyncPackage asyncServiceProvider, OleMenuCommandService menuCommandService, MonoVisualStudioExtension monoVisualStudioExtension)
         {
+            Instance = this;
             _asyncServiceProvider = asyncServiceProvider ?? throw new ArgumentNullException(nameof(asyncServiceProvider));
             _monoExtension = monoVisualStudioExtension ?? throw new ArgumentNullException(nameof(monoVisualStudioExtension));
 

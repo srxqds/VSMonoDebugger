@@ -170,14 +170,14 @@ namespace VSMonoDebugger
         }
 
         [Flags]
-        enum DebuggerMode
+        public enum DebuggerMode
         {
             DeployOverSSH = 0x1,
             DebugOverSSH = 0x2,
             AttachProcess = 0x4
         }
 
-        private async Task<bool> DeployAndRunCommandOverSSHAsync(DebuggerMode debuggerMode)
+        public async Task<bool> DeployAndRunCommandOverSSHAsync(DebuggerMode debuggerMode)
         {
             // TODO error handling
             // TODO show ssh output stream

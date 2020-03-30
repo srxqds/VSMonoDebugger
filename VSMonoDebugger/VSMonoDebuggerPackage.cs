@@ -81,6 +81,8 @@ namespace VSMonoDebugger
                 UserSettingsManager.Initialize(this);
                 _monoVisualStudioExtension = new MonoVisualStudioExtension(this, dte);
                 _monoDebuggerCommands = new VSMonoDebuggerCommands(this, menuCommandService, _monoVisualStudioExtension);
+
+                await AttachToEngineCommand.InitializeAsync(this, menuCommandService, _monoVisualStudioExtension);
             }
             catch (UnauthorizedAccessException uex)
             {
@@ -103,7 +105,6 @@ namespace VSMonoDebugger
             }
 
             await base.InitializeAsync(cancellationToken, progress);
-            await AttachToEngineCommand.InitializeAsync(this);
         }
 
         #endregion
