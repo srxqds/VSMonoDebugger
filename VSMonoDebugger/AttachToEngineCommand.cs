@@ -189,8 +189,14 @@ namespace VSMonoDebugger
             // Switch to the main thread - the call to AddCommand in AttachToEngineCommand's constructor requires
             // the UI thread.
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
-            
             OleMenuCommandService commandService = inCommandService as OleMenuCommandService;
+            Project monoProject = monoVisualStudioExtension.GetStartupProject();
+            CommandID dynamicItemRootId = new CommandID(new Guid(guidDynamicMenuPackageCmdSet), (int)0x1030);
+            if (monoProject == null || !monoProject.Name.Contains("UnrealEngine"))
+            {
+               
+                return;
+            }
             Instance = new AttachToEngineCommand(package, commandService);
             Instance.MonoExtension = monoVisualStudioExtension;
         }
@@ -198,17 +204,26 @@ namespace VSMonoDebugger
         public void OnAttach()
         {
             Instance.AttachCommand.Enabled = false;
+            AttachCommandNotify.Instance.NotifyToEngineAttach(true);
         }
 
         public void OnDetach()
         {
             Instance.AttachCommand.Enabled = true;
+            AttachCommandNotify.Instance.NotifyToEngineDetach(true);
         }
 
         private async void OnDefaultCommandExecute(object sender, EventArgs e)
         {
-            await MonoExtension.BuildStartupProjectAsync();
-            await VSMonoDebuggerCommands.Instance.DeployAndRunCommandOverSSHAsync(VSMonoDebuggerCommands.DebuggerMode.AttachProcess);
+            try
+            {
+                await MonoExtension.BuildStartupProjectAsync();
+                await VSMonoDebuggerCommands.Instance.DeployAndRunCommandOverSSHAsync(VSMonoDebuggerCommands.DebuggerMode.AttachProcess);
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

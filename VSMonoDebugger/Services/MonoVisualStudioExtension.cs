@@ -187,7 +187,7 @@ namespace VSMonoDebugger
             return null;
         }
 
-        private Project GetStartupProject()
+        public Project GetStartupProject()
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 

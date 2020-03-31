@@ -55,6 +55,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AttachCommandNotify.cs" />
     <Compile Include="AttachSubmenuCommand.cs" />
     <Compile Include="AttachToEngineCommand.cs" />
     <Compile Include="Mono.Debugging.VisualStudio\XamarinEngine.cs" />
