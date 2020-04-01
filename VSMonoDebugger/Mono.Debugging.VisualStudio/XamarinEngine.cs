@@ -38,12 +38,17 @@ namespace Mono.Debugging.VisualStudio
 
         protected override void OnStop()
         {
-            this.OnDetach();
+            base.OnStop();
+            //if(this.IsConnected)
+            //    this.OnDetach();
         }
 
         protected override void OnExit()
         {
-            this.OnDetach();
+            if(this.IsConnected)
+                this.OnDetach();
+            // 不能调用OnExit会没有TargetExited回调
+            // base.OnExit();
         }
 
         protected override void OnDetach()
@@ -83,7 +88,7 @@ namespace Mono.Debugging.VisualStudio
 
         private void OnTargetDebugOutput(int level, string category, string message)
         {
-            HostOutputWindowEx.WriteLineLaunchErrorAsync(string.Format("[{0}:{1}] {2}", level, category, message));
+           HostOutputWindowEx.WriteLineLaunchErrorAsync(string.Format("[{0}:{1}] {2}", level, category, message));
         }
     
     }

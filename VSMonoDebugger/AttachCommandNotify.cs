@@ -49,6 +49,8 @@ namespace VSMonoDebugger
         public bool bInited { get; private set; } = false;
         public bool bIsReceiving = false;
         public bool bStop = false;
+        // 如果没有发送数据了，停止Worker
+        public bool bStopWorkerWhenNoSend = true;
         public bool IsConnected
         {
             get { if (Client == null) return false; return Client.Connected; }
@@ -67,7 +69,7 @@ namespace VSMonoDebugger
 
         private void Connect()
         {
-            NLogService.TraceEnteringMethod(Logger);
+            // NLogService.TraceEnteringMethod(Logger);
             if (this.IsConnected)
                 return;
             if (this.ReconnectCurrentCount >= ReconnectMaxCount)
@@ -103,7 +105,7 @@ namespace VSMonoDebugger
         }
         private void Send()
         {
-            NLogService.TraceEnteringMethod(Logger);
+            // NLogService.TraceEnteringMethod(Logger);
             if (!this.IsConnected)
                 return;
             lock (LockObject)
@@ -135,7 +137,7 @@ namespace VSMonoDebugger
 
         private void Receive()
         {
-            NLogService.TraceEnteringMethod(Logger);
+            // NLogService.TraceEnteringMethod(Logger);
             try
             {
                 if (!this.IsConnected)
