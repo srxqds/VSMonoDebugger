@@ -142,7 +142,6 @@ namespace VSMonoDebugger
                     return;
                 if (bIsReceiving)
                     return;
-                byte[] Data = null;
 
                 int DataCount = this.CurrentDataLength;
                 int Offset = this.CurrentDataOffset;
@@ -151,8 +150,10 @@ namespace VSMonoDebugger
                     DataCount = DataHeaderSize;
                 }
                 int Length = DataCount - this.CurrentDataOffset;
-               
-                this.Client.GetStream().BeginRead(Data, Offset, Length, this.OnReceive, null);
+
+                byte[] Data = new byte[Length];
+                if (Length > 0)
+                    this.Client.GetStream().BeginRead(Data, Offset, Length, this.OnReceive, null);
             }catch(Exception e)
             {
                 NLogService.LogError(Logger, e);

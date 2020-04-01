@@ -200,11 +200,20 @@ namespace VSMonoDebugger
             Instance = new AttachToEngineCommand(package, commandService);
             Instance.MonoExtension = monoVisualStudioExtension;
         }
+        
+        private void DoBeforeAttach()
+        {
+        }
 
         public void OnAttach()
         {
             Instance.AttachCommand.Enabled = false;
             AttachCommandNotify.Instance.NotifyToEngineAttach(true);
+        }
+
+        private void DoDebeforeDetach()
+        {
+
         }
 
         public void OnDetach()

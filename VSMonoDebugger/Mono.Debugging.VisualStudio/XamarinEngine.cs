@@ -19,11 +19,17 @@ namespace Mono.Debugging.VisualStudio
     {
         public MonoDebugSession(): base()
         {
-            this.DebugWriter += OnTargetDebug;
+            this.DebugWriter += OnTargetDebugOutput;
+            this.TargetReady += OnTargetReady;
+            this.TargetExited += OnTargetExited;
         }
         protected override bool HandleException(Exception ex)
         {
             if (ex is Mono.Debugger.Soft.VMNotSuspendedException)
+            {
+                return true;
+            }
+            if (ex is Mono.Debugger.Soft.CommandException)
             {
                 return true;
             }
@@ -43,13 +49,11 @@ namespace Mono.Debugging.VisualStudio
         protected override void OnDetach()
         {
             base.OnDetach();
-            AttachToEngineCommand.Instance.OnDetach();
         }
 
         protected override void OnRun(DebuggerStartInfo startInfo)
         {
             base.OnRun(startInfo);
-            AttachToEngineCommand.Instance.OnAttach();
         }
 
         protected override void OnResumed()
@@ -60,10 +64,24 @@ namespace Mono.Debugging.VisualStudio
         protected override void OnAttachToProcess(long processId)
         {
             base.OnAttachToProcess(processId);
-            
         }
 
-        public static void OnTargetDebug(int level, string category, string message)
+        protected override void OnAttachToProcess(ProcessInfo processInfo)
+        {
+            base.OnAttachToProcess(processInfo);
+        }
+        
+        private void OnTargetReady(object sender, TargetEventArgs Args)
+        {
+            AttachToEngineCommand.Instance.OnAttach();
+        }
+
+        private void OnTargetExited(object sender, TargetEventArgs Args)
+        {
+            AttachToEngineCommand.Instance.OnDetach();
+        }
+
+        private void OnTargetDebugOutput(int level, string category, string message)
         {
             HostOutputWindowEx.WriteLineLaunchErrorAsync(string.Format("[{0}:{1}] {2}", level, category, message));
         }
