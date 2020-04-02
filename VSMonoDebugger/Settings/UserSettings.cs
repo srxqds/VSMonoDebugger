@@ -24,6 +24,7 @@ namespace VSMonoDebugger.Settings
             SSHPrivateKeyFile = string.Empty;
             SSHDeployPath = "./MonoDebugTemp/";
             SSHMonoDebugPort = DEFAULT_DEBUGGER_AGENT_PORT;
+            SSHEngineNotifyPort = DEFAULT_DEBUGGER_AGENT_PORT + 1;
             SSHPdb2mdbCommand = "mono /usr/lib/mono/4.5/pdb2mdb.exe";
 
             DeployAndDebugOnLocalWindowsSystem = false;
@@ -154,6 +155,9 @@ namespace VSMonoDebugger.Settings
 
         private int _sSHMonoDebugPort;
         public int SSHMonoDebugPort { get => _sSHMonoDebugPort; set { _sSHMonoDebugPort = value; NotifyPropertyChanged(); } }
+
+        private int _sSHEngineNotifyPort;
+        public int SSHEngineNotifyPort { get => _sSHEngineNotifyPort; set { _sSHEngineNotifyPort = value; NotifyPropertyChanged(); } }
 
         private uint _maxConnectionAttempts;
         public uint MaxConnectionAttempts { get => _maxConnectionAttempts; set { _maxConnectionAttempts = value; NotifyPropertyChanged(); } }

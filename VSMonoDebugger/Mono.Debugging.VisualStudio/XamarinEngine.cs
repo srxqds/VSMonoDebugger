@@ -1,5 +1,8 @@
 ﻿using EnvDTE;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Debugger.Interop;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
 using NLog;
@@ -22,7 +25,9 @@ namespace Mono.Debugging.VisualStudio
             this.DebugWriter += OnTargetDebugOutput;
             this.TargetReady += OnTargetReady;
             this.TargetExited += OnTargetExited;
+            this.TargetHitBreakpoint += OnTargetHitBreakpoint;
         }
+        
         protected override bool HandleException(Exception ex)
         {
             if (ex is Mono.Debugger.Soft.VMNotSuspendedException)
@@ -31,6 +36,11 @@ namespace Mono.Debugging.VisualStudio
             }
             if (ex is Mono.Debugger.Soft.CommandException)
             {
+                return true;
+            }
+            if(ex is Mono.Debugger.Soft.VMDisconnectedException)
+            {
+                HostOutputWindowEx.WriteLineLaunchErrorAsync(ex.ToString());
                 return true;
             }
             return base.HandleException(ex);
@@ -65,7 +75,7 @@ namespace Mono.Debugging.VisualStudio
         {
             base.OnResumed();
         }
-
+        
         protected override void OnAttachToProcess(long processId)
         {
             base.OnAttachToProcess(processId);
@@ -74,6 +84,26 @@ namespace Mono.Debugging.VisualStudio
         protected override void OnAttachToProcess(ProcessInfo processInfo)
         {
             base.OnAttachToProcess(processInfo);
+        }
+
+        private void OnTargetHitBreakpoint(object sender, TargetEventArgs Args)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            // todo 
+            var outputWindow = (IVsOutputWindow)Package.GetGlobalService(typeof(SVsOutputWindow));
+            if (outputWindow == null)
+            {
+                return;
+            }
+
+            IVsOutputWindowPane pane;
+            Guid guidDebugOutputPane = VSConstants.GUID_VSStandardCommandSet97;
+            var hr = outputWindow.GetPane(ref guidDebugOutputPane, out pane);
+            if (hr < 0)
+            {
+                return;
+            }
+            pane.Activate(); // Brings this pane into view
         }
         
         private void OnTargetReady(object sender, TargetEventArgs Args)
@@ -88,8 +118,10 @@ namespace Mono.Debugging.VisualStudio
 
         private void OnTargetDebugOutput(int level, string category, string message)
         {
-           HostOutputWindowEx.WriteLineLaunchErrorAsync(string.Format("[{0}:{1}] {2}", level, category, message));
+           HostOutputWindowEx.WriteLineLaunchErrorAsync(string.Format("[{0,3:###}]:{1}: {2}", level.ToString("000"), category, message));
         }
+
+       
     
     }
 
@@ -104,6 +136,7 @@ namespace Mono.Debugging.VisualStudio
         protected StartInfo _startInfo;
 
         public static Project StartupProject { set; get; }
+        public static DebugOptions DebugOptions { private set; get; }
 
         public XamarinEngine()
         {
@@ -129,6 +162,7 @@ namespace Mono.Debugging.VisualStudio
                 var connectionTimeout = 30000;
                 var evaluationTimeout = 30000;
                 var startupProject = StartupProject;
+                XamarinEngine.DebugOptions = debugOptions;
                 var softDebuggerConnectArgs = new SoftDebuggerConnectArgs(debugOptions.TargetExeFileName, debugOptions.GetHostIP(), debugOptions.GetMonoDebugPort());
 
                 // TODO implement programm output via stream

@@ -56,5 +56,10 @@ namespace VSMonoDebugger.Settings
         {
             return UserSettings.SSHMonoDebugPort;            
         }
+
+        public int GetEngineNotifyPort()
+        {
+            return UserSettings.SSHEngineNotifyPort;
+        }
     }
 }
